@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-# Install and configure Nginx to respond HTTP with a custom header
+# Configure Nginx with custom HTTP header X-Served-By
 
 sudo apt-get -y update
 sudo apt-get -y install nginx
-sudo echo "Holberton School" > /var/www/html/index.nginx-debian.html
-sudo echo "Ceci n'est pas une page" > /usr/share/nginx/html/custom_404.html
-sudo sed -i "s/server_name _;/server_name _;\n\trewrite ^\/redirect_me https:\/\/github.com\/Goodluck-dc14 permanent;\n\n\terror_page 404 \/custom_404.html;\n\tlocation = \/custom_404.html {\n\t\troot \/usr\/share\/nginx\/html;\n\t\tinternal;\n\t}/" /etc/nginx/sites-available/default
-sudo sed -i "s/server_name _;/server_name _;\n\tadd_header X-Served-By \"$HOSTNAME\";/" /etc/nginx/sites-available/default
-sudo service nginx start
+
+# Set up a simple index page
+echo "Hello World!" | sudo tee /var/www/html/index.nginx-debian.html
+
+# Add X-Served-By header with hostname
+sudo sed -i "/server_name _/a \ \n\tadd_header X-Served-By $(hostname);" /etc/nginx/sites-available/default
+
+# Restart Nginx
+sudo service nginx restart
