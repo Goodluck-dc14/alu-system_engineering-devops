@@ -1,8 +1,20 @@
 #!/usr/bin/env bash
-# Fix this container so that Nginx is running as the nginx user.
+# Configures Nginx to run as the nginx user and listen on port 8080.
 
-sed -i "s/#user www-data/user nginx/" /etc/nginx/nginx.conf
-sed -i "s/80/8080/g" /etc/nginx/sites-available/default
+# Modify the Nginx configuration to run as the nginx user
+sed -i "s/#user www-data/user nginx/" /etc/nginx/nginx.conf || sed -i "s/user www-data/user nginx/" /etc/nginx/nginx.conf
+
+# Update the default site to listen on port 8080 instead of 80
+sed -i "s/listen 80/listen 8080/" /etc/nginx/sites-available/default
+
+# Ensure the configuration file has the correct permissions
 chmod 644 /etc/nginx/nginx.conf
-pkill apache2
-sudo -u nginx service nginx start
+
+# Stop any Apache2 process that might be conflicting on port 8080
+pkill -9 apache2 2>/dev/null || true
+
+# Stop Nginx if it’s running (as root or otherwise)
+service nginx stop 2>/dev/null || true
+
+# Start Nginx as the nginx user
+sudo -u nginx /usr/sbin/nginx -g "daemon off;"
